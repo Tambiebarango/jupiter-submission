@@ -6,7 +6,7 @@ const app: Express = express();
 app.use(express.json());
 
 app.post('/signup', async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { username, password } = req.body ?? {};
 
   try {
     await signup(username, password)
@@ -17,11 +17,7 @@ app.post('/signup', async (req: Request, res: Response) => {
 });
 
 app.post('/login', async (req: Request, res: Response) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(401).send('Invalid username or password');
-  }
+  const { username, password } = req.body ?? {};
 
   try {
     await login(username, password);

@@ -31,6 +31,10 @@ export async function signup(username:string, password:string) {
 }
 
 export async function login(username: string, password: string) {
+  if (!username || !password) {
+    throw new Error('Invalid username or password');
+  }
+
   const passwordHash = users[username];
 
   if (!passwordHash) {
