@@ -1,17 +1,18 @@
 import bcrypt from "bcrypt";
-
-interface User {
-  [username: string]: string
-}
-
-let users: User = {};
+import { userRepository } from '../db/userRepository.ts';
 
 export async function signup(username:string, password:string) {
   if (!username || !password) {
     throw new Error('Username and password are required.')
   }
 
-  if (Object.hasOwn(users, username)) {
+  const existingUser = await userRepository
+    .search()
+    .where('username')
+    .eq(username)
+    .returnFirst();
+
+  if (existingUser) {
     throw new Error('Username is already taken');
   }
 
@@ -27,7 +28,11 @@ export async function signup(username:string, password:string) {
     );
   }
 
-  users[username] = await bcrypt.hash(password, 12);
+  const hashedPassword = await bcrypt.hash(password, 12);
+
+  const user = { username: username, password: hashedPassword };
+
+  await userRepository.save(user);
 }
 
 export async function login(username: string, password: string) {
@@ -35,13 +40,17 @@ export async function login(username: string, password: string) {
     throw new Error('Invalid username or password');
   }
 
-  const passwordHash = users[username];
+  const user = await repository
+    .search()
+    .where('username')
+    .eq(username)
+    .returnFirst();
 
-  if (!passwordHash) {
+  if (!user) {
     throw new Error('Invalid username or password');
   }
 
-  const passwordIsValid = await bcrypt.compare(password, passwordHash);
+  const passwordIsValid = await bcrypt.compare(password, user.password);
 
   if (!passwordIsValid) {
     throw new Error('Invalid username or password');
