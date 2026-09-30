@@ -92,3 +92,7 @@ npm test
 ```
 
 ## Considerations for future development
+
+- Consider using `redis-om` for object mapping and simpler retrieval of user data from Redis. Uniqueness and concurrent updates still rely on Redis atomic operations; the mapping library alone does not provide that guarantee.
+- Add JSON error-handling middleware for malformed request bodies and other errors rejected before reaching a route handler.
+- Distinguish expected API errors (such as invalid input or duplicate usernames) from unexpected server or dependency failures, and return suitable status codes and JSON responses without exposing internal details.
