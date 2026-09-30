@@ -1,18 +1,14 @@
 import bcrypt from "bcrypt";
-import { userRepository } from '../db/userRepository.ts';
+import { redisClient } from './redisClient.ts';
 
 export async function signup(username:string, password:string) {
   if (!username || !password) {
     throw new Error('Username and password are required.')
   }
 
-  const existingUser = await userRepository
-    .search()
-    .where('username')
-    .eq(username)
-    .returnFirst();
+  const userExists = await redisClient.exists(username)
 
-  if (existingUser) {
+  if (userExists) {
     throw new Error('Username is already taken');
   }
 
@@ -30,9 +26,7 @@ export async function signup(username:string, password:string) {
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  const user = { username: username, password: hashedPassword };
-
-  await userRepository.save(user);
+  await redisClient.hSet(username, 'password', hashedPassword, { NX: true });
 }
 
 export async function login(username: string, password: string) {
@@ -40,19 +34,12 @@ export async function login(username: string, password: string) {
     throw new Error('Invalid username or password');
   }
 
-  const user = await repository
-    .search()
-    .where('username')
-    .eq(username)
-    .returnFirst();
-
-  if (!user) {
-    throw new Error('Invalid username or password');
-  }
-
+  const user = await redisClient.hGetAll(username);
   const passwordIsValid = await bcrypt.compare(password, user.password);
 
-  if (!passwordIsValid) {
+  if (passwordIsValid) {
+    return; // return JWT
+  } else {
     throw new Error('Invalid username or password');
   }
 }

@@ -10,9 +10,9 @@ app.post('/signup', async (req: Request, res: Response) => {
 
   try {
     await signup(username, password)
-    res.send('Successfully signed you up!');
+    res.sendStatus(200);
   } catch (error) {
-    res.status(400).send((error as Error).message);
+    res.status(400).send('Something went wrong!');
   }
 });
 
