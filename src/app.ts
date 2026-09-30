@@ -10,9 +10,9 @@ app.post("/signup", async (req: Request, res: Response) => {
 
   try {
     await signup(username, password);
-    res.sendStatus(200);
-  } catch {
-    res.status(400).send("Something went wrong!");
+    res.status(200).send("Signup successful!");
+  } catch (error) {
+    res.status(400).send(`Oops: ${(error as Error).message}`);
   }
 });
 
@@ -21,7 +21,7 @@ app.post("/login", async (req: Request, res: Response) => {
 
   try {
     await login(username, password);
-    return res.sendStatus(200);
+    return res.status(200).send("Logged in!");
   } catch {
     return res.status(401).send("Invalid username or password");
   }
