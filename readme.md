@@ -39,16 +39,16 @@ curl -i http://localhost:3000/signup \
   -d '{"username":"alex","password":"StrongPass1"}'
 ```
 
-Success response status (`200`):
+Success response (`200`):
 
-```text
-Signup successful!
+```json
+{ "message": "Signup successful!" }
 ```
 
-Invalid input, an existing username, or another signup error returns `400` with an error message, for example:
+Invalid input or an existing username returns `400` with a message, for example:
 
-```text
-Oops: Username is already taken
+```json
+{ "message": "Username is already taken" }
 ```
 
 ### `POST /login`
@@ -65,14 +65,14 @@ curl -i http://localhost:3000/login \
 
 Success response (`200`):
 
-```text
-Logged in!
+```json
+{ "message": "Logged in!" }
 ```
 
 Missing credentials or a failed login returns `401`:
 
-```text
-Invalid username or password
+```json
+{ "message": "Invalid username or password" }
 ```
 
 ## Tests
