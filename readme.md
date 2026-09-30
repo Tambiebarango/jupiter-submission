@@ -92,7 +92,3 @@ npm test
 ```
 
 ## Considerations for future development
-
-If the assignment had more complexity to it, such as different sort of stored data records, then I'd consider the following improvements to my present solution:
-- Prefer `redis-om` library for object mapping and simpler retrieval of user data from Redis. Use Redis atomic operations (such as a conditional write or transaction) for uniqueness and concurrent updates; the mapping library alone does not guarantee atomicity.
-- Return an expiring JWT after successful login so authenticated users can access protected endpoints.

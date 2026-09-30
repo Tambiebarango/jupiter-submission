@@ -6,12 +6,6 @@ export async function signup(username: string, password: string) {
     throw new Error("Username and password are required.");
   }
 
-  const userExists = await redisClient.exists(username);
-
-  if (userExists) {
-    throw new Error("Username is already taken");
-  }
-
   const passwordIsValid =
     password.length >= 8 &&
     /[A-Z]/.test(password) &&
@@ -26,7 +20,15 @@ export async function signup(username: string, password: string) {
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  await redisClient.hSet(username, "password", hashedPassword, { NX: true });
+  const passwordWasStored = await redisClient.hSetNX(
+    username,
+    "password",
+    hashedPassword,
+  );
+
+  if (!passwordWasStored) {
+    throw new Error("Username is already taken");
+  }
 
   return true;
 }

@@ -5,8 +5,7 @@ import { login, signup } from "./authService.ts";
 
 vi.mock("./redisClient.ts", () => ({
   redisClient: {
-    exists: vi.fn(),
-    hSet: vi.fn(),
+    hSetNX: vi.fn(),
     hGetAll: vi.fn(),
   },
 }));
@@ -44,24 +43,25 @@ describe("signup", () => {
   });
 
   test("raises error if username has been taken", async () => {
-    vi.mocked(redisClient.exists).mockResolvedValue(1);
+    vi.mocked(bcrypt.hash).mockResolvedValue("hashed-password");
+    vi.mocked(redisClient.hSetNX).mockResolvedValue(0);
 
     await expect(signup("username", "Password123")).rejects.toThrowError(
       new Error("Username is already taken"),
     );
+    expect(redisClient.hSetNX).toHaveBeenCalledOnce();
   });
 
   test("saves the username and password when it meets all requirements", async () => {
-    vi.mocked(redisClient.exists).mockResolvedValue(0);
     vi.mocked(bcrypt.hash).mockResolvedValue("hashed-password");
+    vi.mocked(redisClient.hSetNX).mockResolvedValue(1);
 
     await expect(signup("new-user", "StrongPass1")).resolves.toBe(true);
-    expect(redisClient.hSet).toHaveBeenCalledOnce();
-    expect(redisClient.hSet).toHaveBeenCalledWith(
+    expect(redisClient.hSetNX).toHaveBeenCalledOnce();
+    expect(redisClient.hSetNX).toHaveBeenCalledWith(
       "new-user",
       "password",
       "hashed-password",
-      { NX: true },
     );
   });
 });
