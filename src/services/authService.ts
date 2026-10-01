@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { redisClient } from "./redisClient.ts";
+import { AuthenticationError } from "./util/authenticationError.ts";
 
 function passwordIsValid(password: string) {
   return (
@@ -13,11 +14,11 @@ function passwordIsValid(password: string) {
 
 export async function signup(username: string, password: string) {
   if (!username || !password) {
-    throw new Error("Username and password are required.");
+    throw new AuthenticationError("Username and password are required.");
   }
 
   if (!passwordIsValid(password)) {
-    throw new Error(
+    throw new AuthenticationError(
       "Password must be at least 8 characters and contain an uppercase letter, lowercase letter, and number.",
     );
   }
@@ -31,7 +32,7 @@ export async function signup(username: string, password: string) {
   );
 
   if (!passwordWasStored) {
-    throw new Error("Username is already taken");
+    throw new AuthenticationError("Username is already taken");
   }
 
   return true;
@@ -39,7 +40,7 @@ export async function signup(username: string, password: string) {
 
 export async function login(username: string, password: string) {
   if (!username || !password) {
-    throw new Error("Invalid username or password");
+    throw new AuthenticationError("Invalid username or password");
   }
 
   const user = await redisClient.hGetAll(username);
@@ -51,6 +52,6 @@ export async function login(username: string, password: string) {
 
     return jwt.sign(payload, secret, { expiresIn: "1h" });
   } else {
-    throw new Error("Invalid username or password");
+    throw new AuthenticationError("Invalid username or password");
   }
 }

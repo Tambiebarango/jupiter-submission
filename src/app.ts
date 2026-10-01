@@ -1,6 +1,7 @@
 import express, { type Express, type Request, type Response } from "express";
 import { login, signup } from "./services/authService.ts";
 import "dotenv/config";
+import { AuthenticationError } from "./services/util/authenticationError.ts";
 
 const app: Express = express();
 
@@ -26,7 +27,11 @@ app.post("/login", async (req: Request, res: Response) => {
       .status(200)
       .send({ message: "Logged in!", accessToken: accessToken });
   } catch (error) {
-    return res.status(401).send({ message: (error as Error).message });
+    if (error instanceof AuthenticationError) {
+      return res.status(401).send({ message: (error as Error).message });
+    } else {
+      return res.status(500).send({ message: "Something went wrong" });
+    }
   }
 });
 
