@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { redisClient } from "./redisClient.ts";
 import { login, signup } from "./authService.ts";
@@ -14,6 +15,12 @@ vi.mock("bcrypt", () => ({
   default: {
     hash: vi.fn(),
     compare: vi.fn(),
+  },
+}));
+
+vi.mock("jsonwebtoken", () => ({
+  default: {
+    sign: vi.fn(),
   },
 }));
 
@@ -90,12 +97,18 @@ describe("login", () => {
     );
   });
 
-  test("it returns true if password is valid", async () => {
+  test("it returns jwt token if password is valid", async () => {
     vi.mocked(redisClient.hGetAll).mockResolvedValue({
       password: "StrongPass1",
     });
     vi.mocked(bcrypt.compare).mockResolvedValue(true);
+    vi.mocked(jwt.sign).mockReturnValue("accessToken");
 
-    await expect(login("username", "StrongPass1")).resolves.toBe(true);
+    await expect(login("username", "StrongPass1")).resolves.toBe("accessToken");
+    expect(jwt.sign).toHaveBeenCalledWith(
+      { username: "username" },
+      expect.any(String),
+      { expiresIn: "1h" },
+    );
   });
 });

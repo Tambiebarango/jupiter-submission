@@ -1,5 +1,6 @@
 import express, { type Express, type Request, type Response } from "express";
 import { login, signup } from "./services/authService.ts";
+import "dotenv/config";
 
 const app: Express = express();
 
@@ -20,10 +21,12 @@ app.post("/login", async (req: Request, res: Response) => {
   const { username, password } = req.body ?? {};
 
   try {
-    await login(username, password);
-    return res.status(200).send({ message: "Logged in!" });
-  } catch {
-    return res.status(401).send({ message: "Invalid username or password" });
+    const accessToken = await login(username, password);
+    return res
+      .status(200)
+      .send({ message: "Logged in!", accessToken: accessToken });
+  } catch (error) {
+    return res.status(401).send({ message: (error as Error).message });
   }
 });
 
