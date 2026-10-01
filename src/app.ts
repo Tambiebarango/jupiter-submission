@@ -2,6 +2,7 @@ import express, { type Express, type Request, type Response } from "express";
 import { login, signup } from "./services/authService.ts";
 import "dotenv/config";
 import { AuthenticationError } from "./services/util/authenticationError.ts";
+import { authenticateUser } from "./middleware/authenticateUser.ts";
 
 const app: Express = express();
 
@@ -12,9 +13,9 @@ app.post("/signup", async (req: Request, res: Response) => {
 
   try {
     await signup(username, password);
-    res.status(200).send({ message: "Signup successful!" });
+    res.status(200).json({ message: "Signup successful!" });
   } catch (error) {
-    res.status(400).send({ message: (error as Error).message });
+    res.status(400).json({ message: (error as Error).message });
   }
 });
 
@@ -25,14 +26,18 @@ app.post("/login", async (req: Request, res: Response) => {
     const accessToken = await login(username, password);
     return res
       .status(200)
-      .send({ message: "Logged in!", accessToken: accessToken });
+      .json({ message: "Logged in!", accessToken: accessToken });
   } catch (error) {
     if (error instanceof AuthenticationError) {
-      return res.status(401).send({ message: (error as Error).message });
+      return res.status(401).json({ message: (error as Error).message });
     } else {
-      return res.status(500).send({ message: "Something went wrong" });
+      return res.status(500).json({ message: "Something went wrong" });
     }
   }
+});
+
+app.get("/foo", authenticateUser, async (req: Request, res: Response) => {
+  return res.status(200).json({ message: "bar!" });
 });
 
 app.listen(3000);
