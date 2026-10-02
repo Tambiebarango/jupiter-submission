@@ -2,22 +2,16 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { login, signup } from "./authService.ts";
 
 const mocks = vi.hoisted(() => ({
-  hSetNX: vi.fn<
-    (key: string, field: string, value: string) => Promise<number>
-  >(),
+  hSetNX:
+    vi.fn<(key: string, field: string, value: string) => Promise<number>>(),
   hGetAll: vi.fn<(key: string) => Promise<Record<string, string>>>(),
   hash: vi.fn<
     (data: string | Buffer, saltOrRounds: string | number) => Promise<string>
   >(),
-  compare: vi.fn<
-    (data: string | Buffer, encrypted: string) => Promise<boolean>
-  >(),
+  compare:
+    vi.fn<(data: string | Buffer, encrypted: string) => Promise<boolean>>(),
   sign: vi.fn<
-    (
-      payload: object,
-      secret: string,
-      options: { expiresIn: string },
-    ) => string
+    (payload: object, secret: string, options: { expiresIn: string }) => string
   >(),
 }));
 
